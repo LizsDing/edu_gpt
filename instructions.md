@@ -1,59 +1,44 @@
-###################################
-# active a vitual env
+# How to set everything up
+## active a vitual env
+
+```
 python -m venv .genai_venv
+```
 
-###################################
-# launch local server
 
-python -m http.server  
 
+## launch jupyter notebook without token or password
+```
 jupyter notebook --NotebookApp.token=''
+```
 
-###################################
-# make a venv available to your jupyterlab
+## make the venv available to your jupyter as a selectable kernel
+in jupyter notebook, run
+```
 !pip install ipykernel
 !python -m ipykernel install --name= .genai_venv
+```
 
+## launch local web server
 
-###################################
-# in the website, enable GPT
-import openai
-import os
+```
+python -m http.server  
+```
 
-from dotenv import load_dotenv, find_dotenv
-_ = load_dotenv(find_dotenv())
+## find local jupyter setting to allow access from local web server
+- assuming local web server is on 8000 port:
+- open C:\Users\neo.zhou\.jupyter\jupyter_notebook_config.py
+- find tornado_settings and change that to
+```
+c.NotebookApp.tornado_settings = {
+    'headers': {
+        'Content-Security-Policy': "frame-ancestors 'self' 'http://localhost:8000/' * "
+  }
+}
+```
 
-openai.api_key  = "10cc2870a5a04bd6914904c551eeeaf2" #os.getenv('OPENAI_API_KEY')
-
-
-###################################
-
-def get_completion(prompt, model="gpt-3.5-turbo"):
-    messages = [{"role": "user", "content": prompt}]
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0, # this is the degree of randomness of the model's output
-    )
-    return response.choices[0].message["content"]
-
-
-text = f"""
-You should express what you want a model to do by \ 
-providing instructions that are as clear and \ 
-specific as you can possibly make them. \ 
-This will guide the model towards the desired output, \ 
-and reduce the chances of receiving irrelevant \ 
-or incorrect responses. Don't confuse writing a \ 
-clear prompt with writing a short prompt. \ 
-In many cases, longer prompts provide more clarity \ 
-and context for the model, which can lead to \ 
-more detailed and relevant outputs.
-"""
-prompt = f"""
-Summarize the text delimited by triple backticks \ 
-into 3 points.
-```{text}```
-"""
-response = get_completion(prompt)
-print(response)
+## add .env file under folder notebooks_for_repl and add the following contents
+replace 12345 with your openai api key from azure
+```
+OPENAI_API_KEY=12345
+```
